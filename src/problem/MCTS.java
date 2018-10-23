@@ -1,5 +1,7 @@
 package problem;
 
+import java.util.ArrayList;
+
 class MCTS {
 
     Sampler sampler;
@@ -26,7 +28,7 @@ class MCTS {
         Node currentNode = rootNode;
 
         while (!isTerminalState(currentState)) {
-            ActionDetail actionDetail = selectAction();
+            ActionDetail actionDetail = selectAction(currentNode);
             if (actionDetail.action == Action.CONTINUE_MOVING) {
                 boolean hasChildWithMove = false;
                 for (Node n : currentNode.children) {
@@ -65,33 +67,32 @@ class MCTS {
     }
 
     private ActionDetail selectAction(Node n) {
-      float maxv = Float.MIN_VALUE; // -inf
-      int numChildren = n.numChildren();
-      ArrayList<int> j = new ArrayList<>();
-      for (int i=0; i<numChildren; i++) {
-        Node child = getChild(i);
-        int childCount = child.count;
-        float currentV = 0;
+        float maxv = Float.MIN_VALUE; // -inf
+        int numChildren = n.numChildren();
+        ArrayList<Integer> j = new ArrayList<>();
+        for (int i = 0; i < numChildren; i++) {
+            Node child = n.getChild(i);
+            int childCount = child.count;
+            float currentV = 0;
 
-        if (childCount == 0) {
-          v = Float.MAX_VALUE; // +inf
+            if (childCount == 0) {
+                currentV = Float.MAX_VALUE; // +inf
+            } else {
+                currentV = child.reward + 2 * Math.sqrt((2 * Math.log(n.count)) / (childCount));
+            }
+            if (currentV >= maxv) {
+                maxv = currentV;
+                j.add(i);
+            }
+        }
+        int returnIndex;
+        if (j.length() > 1) {
+            // randomly pick an action
+            int returnIndex = (int) (Math.random() * (j.length() - 1));
         } else {
-          currentV = child.reward + 2*Math.sqrt((2*Math.ln(n.count))/(childCount))
+            returnIndex = j.get(0);
         }
-        if (currentV >= maxv) {
-          maxv = currentV;
-          j.add(i);
-        }
-      }
-      int returnIndex;
-      if (j.length() > 1) {
-        // randomly pick an action
-        int returnIndex = (int)(Math.random() * (j.length()-1));
-      }
-      else {
-        returnIndex = j.get(0);
-      }
-      return n.getChild(returnIndex).actionDetail;
+        return n.getChild(returnIndex).actionDetail;
     }
 
     private State transition(State state, ActionDetail actionDetail) {

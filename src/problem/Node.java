@@ -19,16 +19,14 @@ public class Node {
         this.actionDetail = actionDetial;
     }
 
-<<<<<<< HEAD
-    public numChildren() {
-      return this.children.length();
+    public int numChildren() {
+        return this.children.length();
     }
 
-    public getChild(int i) {
-      if (i <= numChildren) return children.get(i);
-      else return null;
+    public Node getChild(int i) {
+        if (i <= numChildren)
+            return children.get(i);
+        else
+            return null;
     }
 }
-=======
-}
->>>>>>> 083c05db24e24ffcfbc32b49121cda88d394d14a
