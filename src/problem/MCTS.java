@@ -6,7 +6,7 @@ class MCTS {
 
     Sampler sampler;
 
-    public Action search(State initState, int maxTime) {
+    public ActionDetail search(State initState, int maxTime) {
         sampler = new Sampler();
         long startTime = System.currentTimeMillis();
         // init tree
@@ -163,11 +163,11 @@ class MCTS {
 
     private ActionDetail bestAction(Node rootNode) {
         float bestValue = 0;
-        ActionDetail bestAction;
+        ActionDetail bestAction = null;
         for (Node n : rootNode.children) {
             float childValue = n.reward / n.count;
             if (childValue > bestValue) {
-                bestAction = childValue;
+                bestValue = childValue;
                 bestAction = n.actionDetail;
             }
         }
