@@ -22,8 +22,34 @@ class MCTS {
 
     }
 
-    private Action selectAction() {
-        return Action.CONTINUE_MOVING;
+    private ActionDetail selectAction(Node n) {
+      float maxv = Float.MIN_VALUE; // -inf
+      int numChildren = n.numChildren();
+      ArrayList<int> j = new ArrayList<>();
+      for (int i=0; i<numChildren; i++) {
+        Node child = getChild(i);
+        int childCount = child.count;
+        float currentV = 0;
+
+        if (childCount == 0) {
+          v = Float.MAX_VALUE; // +inf
+        } else {
+          currentV = child.reward + 2*Math.sqrt((2*Math.ln(n.count))/(childCount))
+        }
+        if (currentV >= maxv) {
+          maxv = currentV;
+          j.add(i);
+        }
+      }
+      int returnIndex;
+      if (j.length() > 1) {
+        // randomly pick an action
+        int returnIndex = (int)(Math.random() * (j.length()-1));
+      }
+      else {
+        returnIndex = j.get(0);
+      }
+      return n.getChild(returnIndex).actionDetail;
     }
 
     private State transition(State state, Action action, String stringValue) {

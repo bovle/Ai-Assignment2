@@ -17,4 +17,13 @@ public class Node {
         this.count = 0;
 
     }
+
+    public numChildren() {
+      return this.children.length();
+    }
+
+    public getChild(int i) {
+      if (i <= numChildren) return children.get(i);
+      else return null;
+    }
 }
