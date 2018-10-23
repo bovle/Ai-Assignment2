@@ -15,10 +15,10 @@ class MCTS {
         while ((System.currentTimeMillis() - startTime) < maxTime * 1000) {
             Node leafNode = findLeaf(root);
             float reward = simulate(leafNode.state);
-
+            backPropagate(leafNode, reward);
         }
-
-        return Action.CONTINUE_MOVING;
+        System.out.println(root.count);
+        return bestAction(root);
 
     }
 
@@ -154,6 +154,19 @@ class MCTS {
             node.count += 1;
             node = node.parent;
         }
+    }
+
+    private ActionDetail bestAction(Node rootNode) {
+        float bestValue = 0;
+        ActionDetail bestAction;
+        for (Node n : rootNode.children) {
+            float childValue = n.reward / n.count;
+            if (childValue > bestValue) {
+                bestAction = childValue;
+                bestAction = n.actionDetail;
+            }
+        }
+        return bestAction;
     }
 
     private boolean isTerminalState(State state) {
