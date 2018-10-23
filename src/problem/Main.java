@@ -22,8 +22,7 @@ public class Main {
             State currentState = new State(car, driver, tyreType, "100", ProblemSpec.FUEL_MAX, 0, 0);
             while (currentState.cellIndex != Utils.pSpec.N - 1 && currentState.timeStep < Utils.pSpec.maxT) {
                 ActionDetail nextAction = mcts.search(currentState, 15);
-                System.out.println(
-                        nextAction.action.toString() + " | " + currentState.cellIndex + " | " + currentState.timeStep);
+                System.out.println(nextAction.action.toString() + " | " + currentState.toString());
                 State nextState = mcts.transition(currentState, nextAction);
                 currentState = nextState;
             }

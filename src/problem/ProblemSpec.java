@@ -180,7 +180,12 @@ public class ProblemSpec {
                 // first part is name of terrain
                 Terrain terrain = parseTerrain(splitLine[0], lineNo);
                 terrainToIndex.put(terrain, i);
-                List<Integer> terrainIndices = parseTerrainCellIndices(splitLine[1], lineNo);
+                List<Integer> terrainIndices;
+                if (splitLine.length > 1) {
+                    terrainIndices = parseTerrainCellIndices(splitLine[1], lineNo);
+                } else {
+                    terrainIndices = new ArrayList<>();
+                }
                 terrainMap.put(terrain, terrainIndices);
                 for (Integer j : terrainIndices) {
                     environmentMap[j - 1] = terrain;
@@ -251,9 +256,11 @@ public class ProblemSpec {
                     slipProbability[i][j] = s.nextFloat();
                     rowSum += slipProbability[i][j];
                 }
-                if (Math.abs(rowSum - 1.0) > 0.001) {
-                    throw new InputMismatchException("Slip probability for does not sum to one for row " + i);
-                }
+                /*
+                 * if (Math.abs(rowSum - 1.0) > 0.001) { throw new
+                 * InputMismatchException("Slip probability for does not sum to one for row " +
+                 * i); }
+                 */
             }
             s.close();
 

@@ -44,7 +44,7 @@ class MCTS {
                 }
                 if (!hasChildWithMove) {
                     Node andNode = new Node(currentNode, actionDetail, currentState);
-                    rootNode.children.add(andNode);
+                    currentNode.children.add(andNode);
                     currentNode = andNode;
                 }
             }
@@ -74,7 +74,16 @@ class MCTS {
         float maxv = Float.MIN_VALUE; // -inf
         int numChildren = n.numChildren();
         ArrayList<Integer> j = new ArrayList<>();
-        List<ActionDetail> unexploredActions = Utils.pSpec.actionDetails;
+        List<ActionDetail> unexploredActions = new ArrayList<>();
+
+        for (ActionDetail ad : Utils.pSpec.actionDetails) {
+            if (!((ad.action == Action.CHANGE_CAR && ad.stringValue.equals(n.state.car))
+                    || (ad.action == Action.CHANGE_DRIVER && ad.stringValue.equals(n.state.driver))
+                    || (ad.action == Action.CHANGE_TYRES && ad.stringValue.equals(n.state.tyreType))
+                    || (ad.action == Action.CHANGE_PRESSURE && ad.stringValue.equals(n.state.tyrePressure)))) {
+                unexploredActions.add(ad);
+            }
+        }
 
         if (numChildren < unexploredActions.size()) {
             for (int i = 0; i < numChildren; i++) {
@@ -92,8 +101,8 @@ class MCTS {
             int childCount = child.count;
             float currentV = 0;
 
-            float f = (float) (2 * Math.sqrt((2 * Math.log(n.count)) / (childCount)));
-            currentV = child.reward + f;
+            float f = (float) (2 * Math.sqrt((Math.log(n.count)) / (childCount)));
+            currentV = (child.reward / childCount) + f;
 
             if (currentV > maxv) {
                 maxv = currentV;
@@ -107,7 +116,8 @@ class MCTS {
         int returnIndex;
         if (j.size() > 1) {
             // randomly pick an action
-            returnIndex = (int) (Math.random() * (j.size() - 1));
+            int randomIndex = (int) (Math.random() * (j.size() - 1));
+            returnIndex = j.get(randomIndex);
         } else {
             returnIndex = j.get(0);
         }
@@ -139,14 +149,14 @@ class MCTS {
             }
             break;
         case CHANGE_CAR:
-            return new State(actionDetail.stringValue, state.driver, state.tyreType, state.tyrePressure,
-                    ProblemSpec.FUEL_MAX, state.cellIndex, state.timeStep + 1);
+            return new State(actionDetail.stringValue, state.driver, state.tyreType, "100", ProblemSpec.FUEL_MAX,
+                    state.cellIndex, state.timeStep + 1);
         case CHANGE_DRIVER:
             return new State(state.car, actionDetail.stringValue, state.tyreType, state.tyrePressure, state.fuel,
                     state.cellIndex, state.timeStep + 1);
         case CHANGE_TYRES:
-            return new State(state.car, state.driver, actionDetail.stringValue, state.tyrePressure, state.fuel,
-                    state.cellIndex, state.timeStep + 1);
+            return new State(state.car, state.driver, actionDetail.stringValue, "100", state.fuel, state.cellIndex,
+                    state.timeStep + 1);
         case ADD_FUEL:
             int fuel = state.fuel + 10;
             if (fuel > ProblemSpec.FUEL_MAX)
@@ -173,7 +183,7 @@ class MCTS {
     }
 
     private void backPropagate(Node node, float reward) {
-        while (node.parent != null) {
+        while (node != null) {
             node.reward += reward;
             node.count += 1;
             node = node.parent;
@@ -185,6 +195,8 @@ class MCTS {
         ActionDetail bestAction = null;
         for (Node n : rootNode.children) {
             float childValue = n.reward / n.count;
+            System.out.println(n.actionDetail.action.toString() + ", " + n.actionDetail.stringValue + ", " + n.count
+                    + ", " + childValue);
             if (childValue > bestValue) {
                 bestValue = childValue;
                 bestAction = n.actionDetail;
@@ -210,7 +222,7 @@ class MCTS {
     }
 
     private float getReward(State state) {
-        return Utils.pSpec.N / state.cellIndex;
+        return state.cellIndex / (Utils.pSpec.N - 1);
     }
 
     private int getFuelUsage(State state) {

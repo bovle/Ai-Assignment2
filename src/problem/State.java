@@ -34,4 +34,10 @@ class State {
             return false;
         }
     }
+
+    @Override
+    public String toString() {
+        return "(" + car + ", " + driver + ", " + tyreType + ", " + tyrePressure + ", " + fuel + ", " + cellIndex + ", "
+                + timeStep + ")";
+    }
 }
