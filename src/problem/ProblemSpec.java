@@ -144,8 +144,8 @@ public class ProblemSpec {
                 splitLine = line.split(":");
                 // first part is name of terrain
                 Terrain terrain = parseTerrain(splitLine[0], lineNo);
-                terrainToIndex.put(Terrain, i);
-                terrainToIndex.List<Integer> terrainIndices = parseTerrainCellIndices(splitLine[1], lineNo);
+                terrainToIndex.put(terrain, i);
+                List<Integer> terrainIndices = parseTerrainCellIndices(splitLine[1], lineNo);
                 terrainMap.put(terrain, terrainIndices);
                 for (Integer j : terrainIndices) {
                     environmentMap[j - 1] = terrain;

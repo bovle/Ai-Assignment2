@@ -20,11 +20,11 @@ public class Node {
     }
 
     public int numChildren() {
-        return this.children.length();
+        return this.children.size();
     }
 
     public Node getChild(int i) {
-        if (i <= numChildren)
+        if (i <= this.numChildren())
             return children.get(i);
         else
             return null;

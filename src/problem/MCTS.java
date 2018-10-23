@@ -78,17 +78,22 @@ class MCTS {
             if (childCount == 0) {
                 currentV = Float.MAX_VALUE; // +inf
             } else {
-                currentV = child.reward + 2 * Math.sqrt((2 * Math.log(n.count)) / (childCount));
+                float f = (float)(2 * Math.sqrt((2 * Math.log(n.count)) / (childCount)));
+                currentV = child.reward + f;
             }
-            if (currentV >= maxv) {
+            if (currentV > maxv) {
                 maxv = currentV;
+                j = new ArrayList<>();
                 j.add(i);
+            }
+            else if (currentV == maxv) {
+              j.add(i);
             }
         }
         int returnIndex;
-        if (j.length() > 1) {
+        if (j.size() > 1) {
             // randomly pick an action
-            int returnIndex = (int) (Math.random() * (j.length() - 1));
+            returnIndex = (int) (Math.random() * (j.size() - 1));
         } else {
             returnIndex = j.get(0);
         }
@@ -115,13 +120,13 @@ class MCTS {
             }
             break;
         case CHANGE_CAR:
-            return new State(actionDetial.stringValue, state.driver, state.tyreType, state.tyrePressure,
+            return new State(actionDetail.stringValue, state.driver, state.tyreType, state.tyrePressure,
                     ProblemSpec.FUEL_MAX, state.cellIndex, state.timeStep + 1);
         case CHANGE_DRIVER:
-            return new State(state.car, actionDetial.stringValue, state.tyreType, state.tyrePressure, state.fuel,
+            return new State(state.car, actionDetail.stringValue, state.tyreType, state.tyrePressure, state.fuel,
                     state.cellIndex, state.timeStep + 1);
         case CHANGE_TYRES:
-            return new State(state.car, state.driver, actionDetial.stringValue, state.tyrePressure, state.fuel,
+            return new State(state.car, state.driver, actionDetail.stringValue, state.tyrePressure, state.fuel,
                     state.cellIndex, state.timeStep + 1);
         case ADD_FUEL:
             int fuel = state.fuel + 10;
@@ -130,7 +135,7 @@ class MCTS {
             return new State(state.car, state.driver, state.tyreType, state.tyrePressure, fuel, state.cellIndex,
                     state.timeStep + 1);
         case CHANGE_PRESSURE:
-            return new State(state.car, state.driver, state.tyreType, actionDetial.stringValue, state.fuel,
+            return new State(state.car, state.driver, state.tyreType, actionDetail.stringValue, state.fuel,
                     state.cellIndex, state.timeStep + 1);
         default:
             System.out.println("how did we get here 3?");
