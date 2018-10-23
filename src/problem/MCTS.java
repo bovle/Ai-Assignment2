@@ -1,6 +1,7 @@
 package problem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 class MCTS {
 
@@ -70,17 +71,27 @@ class MCTS {
         float maxv = Float.MIN_VALUE; // -inf
         int numChildren = n.numChildren();
         ArrayList<Integer> j = new ArrayList<>();
+        List<ActionDetail> unexploredActions = Utils.pSpec.actionDetails;
+
+        if (numChildren < unexploredActions.size()) {
+          for (int i = 0; i < numChildren; i++) {
+              Node child = n.getChild(i);
+              if (unexploredActions.contains(child.actionDetail)) {
+                unexploredActions.remove(child.actionDetail);
+              }
+          }
+          int returnIndex = (int) (Math.random() * (unexploredActions.size() - 1));
+          return unexploredActions.get(returnIndex);
+        }
+
         for (int i = 0; i < numChildren; i++) {
             Node child = n.getChild(i);
             int childCount = child.count;
             float currentV = 0;
 
-            if (childCount == 0) {
-                currentV = Float.MAX_VALUE; // +inf
-            } else {
-                float f = (float)(2 * Math.sqrt((2 * Math.log(n.count)) / (childCount)));
-                currentV = child.reward + f;
-            }
+            float f = (float)(2 * Math.sqrt((2 * Math.log(n.count)) / (childCount)));
+            currentV = child.reward + f;
+
             if (currentV > maxv) {
                 maxv = currentV;
                 j = new ArrayList<>();
@@ -90,6 +101,7 @@ class MCTS {
               j.add(i);
             }
         }
+
         int returnIndex;
         if (j.size() > 1) {
             // randomly pick an action

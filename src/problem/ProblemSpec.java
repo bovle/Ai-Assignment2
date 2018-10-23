@@ -72,6 +72,8 @@ public class ProblemSpec {
      */
     float[][] slipProbability;
 
+    List<ActionDetail> actionDetails;
+
     public ProblemSpec(String fileName) throws IOException {
         loadProblem(fileName);
     }
