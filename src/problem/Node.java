@@ -8,16 +8,18 @@ public class Node {
     public State state;
     public float reward;
     public int count;
+    public ActionDetail actionDetail;
 
-    public Node(Node parent, State s) {
+    public Node(Node parent, ActionDetail actionDetial, State s) {
         this.parent = parent;
         this.children = new ArrayList<>();
         this.state = s;
         this.reward = 0;
         this.count = 0;
-
+        this.actionDetail = actionDetial;
     }
 
+<<<<<<< HEAD
     public numChildren() {
       return this.children.length();
     }
@@ -27,3 +29,6 @@ public class Node {
       else return null;
     }
 }
+=======
+}
+>>>>>>> 083c05db24e24ffcfbc32b49121cda88d394d14a
