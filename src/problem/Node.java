@@ -8,13 +8,15 @@ public class Node {
     public State state;
     public float reward;
     public int count;
+    public ActionDetail actionDetail;
 
-    public Node(Node parent, State s) {
+    public Node(Node parent, ActionDetail actionDetial, State s) {
         this.parent = parent;
         this.children = new ArrayList<>();
         this.state = s;
         this.reward = 0;
         this.count = 0;
-
+        this.actionDetail = actionDetial;
     }
+
 }

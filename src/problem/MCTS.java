@@ -4,13 +4,16 @@ class MCTS {
 
     Sampler sampler;
 
-    public Action Search(State initState, int maxTime) {
+    public Action search(State initState, int maxTime) {
         sampler = new Sampler();
         long startTime = System.currentTimeMillis();
         // init tree
+        Node root = new Node(null, null, initState);
 
         while ((System.currentTimeMillis() - startTime) < maxTime * 1000) {
-            findLeaf();
+            Node leafNode = findLeaf(root);
+            float reward = simulate(leafNode.state);
+
         }
 
         return Action.CONTINUE_MOVING;
@@ -18,16 +21,55 @@ class MCTS {
     }
 
     // find a leaf node by traversing the tree using UCT
-    private void findLeaf() {
+    private Node findLeaf(Node rootNode) {
+        State currentState = rootNode.state;
+        Node currentNode = rootNode;
 
+        while (!isTerminalState(currentState)) {
+            ActionDetail actionDetail = selectAction();
+            if (actionDetail.action == Action.CONTINUE_MOVING) {
+                boolean hasChildWithMove = false;
+                for (Node n : currentNode.children) {
+                    if (n.actionDetail.action == Action.CONTINUE_MOVING) {
+                        currentNode = n;
+                        hasChildWithMove = true;
+                        break;
+                    }
+                }
+                if (!hasChildWithMove) {
+                    Node andNode = new Node(currentNode, actionDetail, currentState);
+                    rootNode.children.add(andNode);
+                    currentNode = andNode;
+                }
+            }
+            State newState = transition(currentState, actionDetail);
+            boolean hasChildWithState = false;
+            for (Node n : currentNode.children) {
+                if (n.state.equals(newState)) {
+                    currentNode = n;
+                    currentState = n.state;
+                    hasChildWithState = true;
+                    break;
+                }
+            }
+            if (hasChildWithState) {
+                continue;
+            } else {
+                Node newNode = new Node(currentNode, actionDetail, newState);
+                currentNode.children.add(newNode);
+                currentNode = newNode;
+                break;
+            }
+        }
+        return currentNode;
     }
 
-    private Action selectAction() {
+    private ActionDetail selectAction() {
         return Action.CONTINUE_MOVING;
     }
 
-    private State transition(State state, Action action, String stringValue) {
-        switch (action) {
+    private State transition(State state, ActionDetail actionDetail) {
+        switch (actionDetail.action) {
         case CONTINUE_MOVING:
             int k = sampler.SampleMove(state);
             int fuelUsage = getFuelUsage(state);
@@ -46,14 +88,14 @@ class MCTS {
             }
             break;
         case CHANGE_CAR:
-            return new State(stringValue, state.driver, state.tyreType, state.tyrePressure, ProblemSpec.FUEL_MAX,
-                    state.cellIndex, state.timeStep + 1);
+            return new State(actionDetial.stringValue, state.driver, state.tyreType, state.tyrePressure,
+                    ProblemSpec.FUEL_MAX, state.cellIndex, state.timeStep + 1);
         case CHANGE_DRIVER:
-            return new State(state.car, stringValue, state.tyreType, state.tyrePressure, state.fuel, state.cellIndex,
-                    state.timeStep + 1);
+            return new State(state.car, actionDetial.stringValue, state.tyreType, state.tyrePressure, state.fuel,
+                    state.cellIndex, state.timeStep + 1);
         case CHANGE_TYRES:
-            return new State(state.car, state.driver, stringValue, state.tyrePressure, state.fuel, state.cellIndex,
-                    state.timeStep + 1);
+            return new State(state.car, state.driver, actionDetial.stringValue, state.tyrePressure, state.fuel,
+                    state.cellIndex, state.timeStep + 1);
         case ADD_FUEL:
             int fuel = state.fuel + 10;
             if (fuel > ProblemSpec.FUEL_MAX)
@@ -61,13 +103,30 @@ class MCTS {
             return new State(state.car, state.driver, state.tyreType, state.tyrePressure, fuel, state.cellIndex,
                     state.timeStep + 1);
         case CHANGE_PRESSURE:
-            return new State(state.car, state.driver, state.tyreType, stringValue, state.fuel, state.cellIndex,
-                    state.timeStep + 1);
+            return new State(state.car, state.driver, state.tyreType, actionDetial.stringValue, state.fuel,
+                    state.cellIndex, state.timeStep + 1);
         default:
+            System.out.println("how did we get here 3?");
             break;
         }
 
         return state;
+    }
+
+    private float simulate(State state) {
+        ActionDetail moveAction = new ActionDetail(Action.CONTINUE_MOVING, "");
+        while (!isTerminalState(state)) {
+            state = transition(state, moveAction);
+        }
+        return getReward(state);
+    }
+
+    private void backPropagate(Node node, float reward) {
+        while (node.parent != null) {
+            node.reward += reward;
+            node.count += 1;
+            node = node.parent;
+        }
     }
 
     private boolean isTerminalState(State state) {

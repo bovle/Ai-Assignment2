@@ -19,4 +19,19 @@ class State {
         this.cellIndex = cellIndex;
         this.timeStep = timeStep;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof State)) {
+            return false;
+        }
+        State other = (State) obj;
+        if (car.equals(other.car) && driver.equals(other.driver) && tyreType.equals(other.tyreType)
+                && tyrePressure.equals(other.tyrePressure) && fuel == other.fuel && cellIndex == other.cellIndex
+                && timeStep == other.timeStep) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
