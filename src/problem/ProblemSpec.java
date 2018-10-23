@@ -7,8 +7,8 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 /**
- * This class represents the problem detailed in the assignment spec.
- * It contains functionality to parse the input file and load it into class
+ * This class represents the problem detailed in the assignment spec. It
+ * contains functionality to parse the input file and load it into class
  * variable (see comments for each variable for more info).
  */
 public class ProblemSpec {
@@ -27,44 +27,50 @@ public class ProblemSpec {
     private DecimalFormat df = new DecimalFormat("#.####");
 
     /** The level of the game **/
-    private Level level;
+    Level level;
     /** Discount factor **/
-    private float discountFactor;
+    float discountFactor;
     /** Time to recover from a slip **/
-    private int slipRecoveryTime;
+    int slipRecoveryTime;
     /** Breakdown repair time **/
-    private int repairTime;
+    int repairTime;
     /** The number of cells in map **/
-    private int N;
+    int N;
     /** The maximum number of time-steps allowed for reaching goal **/
-    private int maxT;
+    int maxT;
     /** Number of terrain types **/
-    private int NT;
+    int NT;
+    /* Terrain to index mapping */
+    Map<Terrain, Integer> terrainToIndex;
     /** The environment map as a 1D array of terrains in order **/
-    private Terrain[] environmentMap;
-    /** The terrain map which maps terrains to their cell indices on the
-     * environment map */
+    Terrain[] environmentMap;
+    /**
+     * The terrain map which maps terrains to their cell indices on the environment
+     * map
+     */
     LinkedHashMap<Terrain, List<Integer>> terrainMap;
     /** Number of car types **/
-    private int CT;
+    int CT;
     /** Car probability mapping **/
     Map<String, float[]> carMoveProbability;
+    /* Car to index mapping */
+    Map<String, Integer> carToIndex;
     /** Number of drivers **/
-    private int DT;
+    int DT;
     /** Driver to probability mapping **/
     Map<String, float[]> driverMoveProbability;
     /** Tyre model to probability mapping **/
     Map<String, float[]> tyreModelMoveProbability;
-    /** Fuel usage matrix
-     * Size is NT rows * CT columns
-     * Each row, i, represents the ith terrain type
-     * Each column, j, represents the jth Car type */
-    private int[][] fuelUsage;
-    /** Slip probability matrix
-     * Size s NT rows * CT columns
-     * Each row, i, represents the ith terrain type
-     * Each column, j, represents the jth Car type */
-    private float[][] slipProbability;
+    /**
+     * Fuel usage matrix Size is NT rows * CT columns Each row, i, represents the
+     * ith terrain type Each column, j, represents the jth Car type
+     */
+    int[][] fuelUsage;
+    /**
+     * Slip probability matrix Size s NT rows * CT columns Each row, i, represents
+     * the ith terrain type Each column, j, represents the jth Car type
+     */
+    float[][] slipProbability;
 
     public ProblemSpec(String fileName) throws IOException {
         loadProblem(fileName);
@@ -78,13 +84,12 @@ public class ProblemSpec {
         // 2.
         sb.append("discount: " + discountFactor + "\n");
         sb.append("recoverTime: " + slipRecoveryTime + "\n");
-        sb.append("repairTime: "+ repairTime + "\n");
+        sb.append("repairTime: " + repairTime + "\n");
         // 3.
         sb.append("N: " + N + "\n");
         sb.append("maxT: " + maxT + "\n");
         // 4.
-        sb.append(environmentMap.toString()).append("\n");
-
+        sb.append(Arrays.toString(environmentMap)).append("\n");
 
         return sb.toString();
     }
@@ -92,11 +97,9 @@ public class ProblemSpec {
     /**
      * Loads a problem from a problem text file.
      *
-     * @param fileName
-     *              the path of the text file to load.
-     * @throws IOException
-     *              if the text file doesn't exist or doesn't meet the
-     *              assignment specifications.
+     * @param fileName the path of the text file to load.
+     * @throws IOException if the text file doesn't exist or doesn't meet the
+     *                     assignment specifications.
      */
     private void loadProblem(String fileName) throws IOException {
         BufferedReader input = new BufferedReader(new FileReader(fileName));
@@ -132,6 +135,7 @@ public class ProblemSpec {
 
             // 4. line 4 to (3+NT)
             int NT = level.get_NT();
+            terrainToIndex = new HashMap<>();
             environmentMap = new Terrain[N];
             terrainMap = new LinkedHashMap<>();
             for (int i = 0; i < NT; i++) {
@@ -140,10 +144,11 @@ public class ProblemSpec {
                 splitLine = line.split(":");
                 // first part is name of terrain
                 Terrain terrain = parseTerrain(splitLine[0], lineNo);
-                List<Integer> terrainIndices = parseTerrainCellIndices(splitLine[1], lineNo);
+                terrainToIndex.put(Terrain, i);
+                terrainToIndex.List<Integer> terrainIndices = parseTerrainCellIndices(splitLine[1], lineNo);
                 terrainMap.put(terrain, terrainIndices);
-                for (Integer j: terrainIndices) {
-                    environmentMap[j-1] = terrain;
+                for (Integer j : terrainIndices) {
+                    environmentMap[j - 1] = terrain;
                 }
             }
 
@@ -155,10 +160,12 @@ public class ProblemSpec {
             s.close();
 
             // 6. line (3+NT+2) to (3+NT+2+CT)
+            carToIndex = new HashMap<>();
             carMoveProbability = new LinkedHashMap<>();
             for (int i = 0; i < CT; i++) {
                 line = input.readLine();
                 lineNo++;
+                carToIndex.put(line.split(":")[0], i);
                 parseProbLine(line, carMoveProbability);
             }
 
@@ -215,7 +222,6 @@ public class ProblemSpec {
             }
             s.close();
 
-
         } catch (InputMismatchException e) {
             System.out.println(e.getMessage());
             System.exit(1);
@@ -233,12 +239,12 @@ public class ProblemSpec {
     /**
      * Parse a line of the below form and add entry to map:
      *
-     *      thingName : p0 p1 p2 ... p11
+     * thingName : p0 p1 p2 ... p11
      *
-     * where pi represents probability of ith possible car move distance,
-     * starting at -4 upto 5, then slip and breakdown.
+     * where pi represents probability of ith possible car move distance, starting
+     * at -4 upto 5, then slip and breakdown.
      *
-     * @param line the line text
+     * @param line    the line text
      * @param probMap map the add entry to
      */
     private void parseProbLine(String line, Map<String, float[]> probMap) {
@@ -267,10 +273,7 @@ public class ProblemSpec {
         String[] splitIndices;
         int start, end;
 
-
-
-
-        for (String s: splitText) {
+        for (String s : splitText) {
             splitIndices = s.split("-");
 
             if (splitIndices.length == 1) {
@@ -289,37 +292,37 @@ public class ProblemSpec {
 
     private Terrain parseTerrain(String terrainText, int lineNo) {
         switch (terrainText) {
-            case "dirt":
-                return Terrain.DIRT;
-            case "asphalt":
-                return Terrain.ASPHALT;
-            case "dirt-straight":
-                return Terrain.DIRT_STRAIGHT;
-            case "dirt-slalom":
-                return Terrain.DIRT_SLALOM;
-            case "asphalt-straight":
-                return Terrain.ASPHALT_STRAIGHT;
-            case "asphalt-slalom":
-                return Terrain.ASPHALT_SLALOM;
-            case "dirt-straight-hilly":
-                return Terrain.DIRT_STRAIGHT_HILLY;
-            case "dirt-straight-flat":
-                return Terrain.DIRT_STRAIGHT_FLAT;
-            case "dirt-slalom-hilly":
-                return Terrain.DIRT_SLALOM_HILLY;
-            case "dirt-slalom-flat":
-                return Terrain.DIRT_SLALOM_FLAT;
-            case "asphalt-straight-hilly":
-                return Terrain.ASPHALT_STRAIGHT_HILLY;
-            case "asphalt-straight-flat":
-                return Terrain.ASPHALT_STRAIGHT_FLAT;
-            case "asphalt-slalom-hilly":
-                return Terrain.ASPHALT_SLALOM_HILLY;
-            case "asphalt-slalom-flat":
-                return Terrain.ASPHALT_SLALOM_FLAT;
-            default:
-                String errMsg = "Invalid terrain type " + terrainText + "on line " + lineNo;
-                throw new InputMismatchException(errMsg);
+        case "dirt":
+            return Terrain.DIRT;
+        case "asphalt":
+            return Terrain.ASPHALT;
+        case "dirt-straight":
+            return Terrain.DIRT_STRAIGHT;
+        case "dirt-slalom":
+            return Terrain.DIRT_SLALOM;
+        case "asphalt-straight":
+            return Terrain.ASPHALT_STRAIGHT;
+        case "asphalt-slalom":
+            return Terrain.ASPHALT_SLALOM;
+        case "dirt-straight-hilly":
+            return Terrain.DIRT_STRAIGHT_HILLY;
+        case "dirt-straight-flat":
+            return Terrain.DIRT_STRAIGHT_FLAT;
+        case "dirt-slalom-hilly":
+            return Terrain.DIRT_SLALOM_HILLY;
+        case "dirt-slalom-flat":
+            return Terrain.DIRT_SLALOM_FLAT;
+        case "asphalt-straight-hilly":
+            return Terrain.ASPHALT_STRAIGHT_HILLY;
+        case "asphalt-straight-flat":
+            return Terrain.ASPHALT_STRAIGHT_FLAT;
+        case "asphalt-slalom-hilly":
+            return Terrain.ASPHALT_SLALOM_HILLY;
+        case "asphalt-slalom-flat":
+            return Terrain.ASPHALT_SLALOM_FLAT;
+        default:
+            String errMsg = "Invalid terrain type " + terrainText + "on line " + lineNo;
+            throw new InputMismatchException(errMsg);
         }
     }
 }
