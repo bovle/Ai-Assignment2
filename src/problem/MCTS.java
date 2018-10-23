@@ -6,8 +6,11 @@ class MCTS {
 
     Sampler sampler;
 
+    public MCTS(Sampler sampler) {
+        this.sampler = sampler;
+    }
+
     public ActionDetail search(State initState, int maxTime) {
-        sampler = new Sampler();
         long startTime = System.currentTimeMillis();
         // init tree
         Node root = new Node(null, null, initState);
@@ -78,16 +81,15 @@ class MCTS {
             if (childCount == 0) {
                 currentV = Float.MAX_VALUE; // +inf
             } else {
-                float f = (float)(2 * Math.sqrt((2 * Math.log(n.count)) / (childCount)));
+                float f = (float) (2 * Math.sqrt((2 * Math.log(n.count)) / (childCount)));
                 currentV = child.reward + f;
             }
             if (currentV > maxv) {
                 maxv = currentV;
                 j = new ArrayList<>();
                 j.add(i);
-            }
-            else if (currentV == maxv) {
-              j.add(i);
+            } else if (currentV == maxv) {
+                j.add(i);
             }
         }
         int returnIndex;
@@ -100,14 +102,19 @@ class MCTS {
         return n.getChild(returnIndex).actionDetail;
     }
 
-    private State transition(State state, ActionDetail actionDetail) {
+    public State transition(State state, ActionDetail actionDetail) {
         switch (actionDetail.action) {
         case CONTINUE_MOVING:
             int k = sampler.SampleMove(state);
             int fuelUsage = getFuelUsage(state);
             if (k < 10) {
+                int newCellIndex = state.cellIndex + k - 4;
+                if (newCellIndex < 0)
+                    newCellIndex = 0;
+                if (newCellIndex > Utils.pSpec.N - 1)
+                    newCellIndex = Utils.pSpec.N - 1;
                 return new State(state.car, state.driver, state.tyreType, state.tyrePressure, state.fuel - fuelUsage,
-                        state.cellIndex + k - 4, state.timeStep + 1);
+                        newCellIndex, state.timeStep + 1);
             } else if (k == 10) {
                 return new State(state.car, state.driver, state.tyreType, state.tyrePressure, state.fuel - fuelUsage,
                         state.cellIndex, state.timeStep + Utils.pSpec.slipRecoveryTime);
@@ -176,7 +183,7 @@ class MCTS {
 
     private boolean isTerminalState(State state) {
 
-        if (state.cellIndex == Utils.pSpec.N) {
+        if (state.cellIndex == Utils.pSpec.N - 1) {
             return true;
         }
         if (state.timeStep >= Utils.pSpec.maxT) {

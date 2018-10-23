@@ -72,8 +72,43 @@ public class ProblemSpec {
      */
     float[][] slipProbability;
 
+    List<ActionDetail> actionDetails;
+
     public ProblemSpec(String fileName) throws IOException {
         loadProblem(fileName);
+        actionDetails = new ArrayList<>();
+        for (Action action : level.getAvailableActions()) {
+            switch (action) {
+            case CONTINUE_MOVING: // A1
+                actionDetails.add(new ActionDetail(action, null));
+                break;
+            case CHANGE_CAR: // A2
+                for (String car : this.carMoveProbability.keySet()) {
+                    actionDetails.add(new ActionDetail(action, car));
+                }
+                break;
+            case CHANGE_DRIVER: // A3
+                for (String driver : this.driverMoveProbability.keySet()) {
+                    actionDetails.add(new ActionDetail(action, driver));
+                }
+                break;
+            case CHANGE_TYRES: // A4
+                for (String tyreType : this.tyreModelMoveProbability.keySet()) {
+                    actionDetails.add(new ActionDetail(action, tyreType));
+                }
+                break;
+            case ADD_FUEL: // A5
+                actionDetails.add(new ActionDetail(action, null));
+                break;
+            case CHANGE_PRESSURE: // A6
+                actionDetails.add(new ActionDetail(action, "50"));
+                actionDetails.add(new ActionDetail(action, "75"));
+                actionDetails.add(new ActionDetail(action, "100"));
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     @Override
