@@ -1,6 +1,7 @@
 package problem;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class MCTS {
@@ -31,7 +32,7 @@ class MCTS {
         State currentState = rootNode.state;
         Node currentNode = rootNode;
 
-        while (!isTerminalState(currentState)) {
+        while (!isTerminalState(currentState, false)) {
             ActionDetail actionDetail = selectAction(currentNode);
             if (actionDetail.action == Action.CONTINUE_MOVING) {
                 boolean hasChildWithMove = false;
@@ -80,7 +81,8 @@ class MCTS {
             if (!((ad.action == Action.CHANGE_CAR && ad.stringValue.equals(n.state.car))
                     || (ad.action == Action.CHANGE_DRIVER && ad.stringValue.equals(n.state.driver))
                     || (ad.action == Action.CHANGE_TYRES && ad.stringValue.equals(n.state.tyreType))
-                    || (ad.action == Action.CHANGE_PRESSURE && ad.stringValue.equals(n.state.tyrePressure)))) {
+                    || (ad.action == Action.CHANGE_PRESSURE && ad.stringValue.equals(n.state.tyrePressure))
+                    || (ad.action == Action.CONTINUE_MOVING && n.state.fuel < getFuelUsage(n.state)))) {
                 unexploredActions.add(ad);
             }
         }
@@ -101,7 +103,7 @@ class MCTS {
             int childCount = child.count;
             float currentV = 0;
 
-            float f = (float) (2 * Math.sqrt((Math.log(n.count)) / (childCount)));
+            float f = (float) (Math.sqrt((2 * Math.log(n.count)) / (childCount)));
             currentV = (child.reward / childCount) + f;
 
             if (currentV > maxv) {
@@ -128,7 +130,10 @@ class MCTS {
         switch (actionDetail.action) {
         case CONTINUE_MOVING:
             int k = sampler.SampleMove(state);
-            int fuelUsage = getFuelUsage(state);
+            int fuelUsage = 0;
+            if (Utils.pSpec.level.getLevelNumber() != 1) {
+                fuelUsage = getFuelUsage(state);
+            }
             if (k < 10) {
                 int newCellIndex = state.cellIndex + k - 4;
                 if (newCellIndex < 0)
@@ -176,7 +181,7 @@ class MCTS {
 
     private float simulate(State state) {
         ActionDetail moveAction = new ActionDetail(Action.CONTINUE_MOVING, "");
-        while (!isTerminalState(state)) {
+        while (!isTerminalState(state, true)) {
             state = transition(state, moveAction);
         }
         return getReward(state);
@@ -191,21 +196,31 @@ class MCTS {
     }
 
     private ActionDetail bestAction(Node rootNode) {
-        float bestValue = 0;
+        float bestValue = Float.MIN_VALUE;
         ActionDetail bestAction = null;
-        for (Node n : rootNode.children) {
-            float childValue = n.reward / n.count;
+        Collections.sort(rootNode.children, (a, b) -> {
+            float res = (b.reward / b.count) - (a.reward / a.count);
+            if (res > 0)
+                return 1;
+            else if (res < 0)
+                return -1;
+            else
+                return 0;
+        });
+
+        for (int i = 0; i < 3; i++) {
+            Node n = rootNode.children.get(i);
             System.out.println(n.actionDetail.action.toString() + ", " + n.actionDetail.stringValue + ", " + n.count
-                    + ", " + childValue);
-            if (childValue > bestValue) {
-                bestValue = childValue;
-                bestAction = n.actionDetail;
-            }
+                    + ", " + n.reward / n.count);
+        }
+        bestAction = rootNode.children.get(0).actionDetail;
+        if (bestAction == null) {
+            System.err.println("no best action?");
         }
         return bestAction;
     }
 
-    private boolean isTerminalState(State state) {
+    private boolean isTerminalState(State state, boolean isSimulation) {
 
         if (state.cellIndex == Utils.pSpec.N - 1) {
             return true;
@@ -214,7 +229,7 @@ class MCTS {
             return true;
         }
 
-        if (state.fuel < getFuelUsage(state)) {
+        if (isSimulation && state.fuel < getFuelUsage(state)) {
             return true;
         }
 
@@ -222,7 +237,12 @@ class MCTS {
     }
 
     private float getReward(State state) {
-        return state.cellIndex / (Utils.pSpec.N - 1);
+        if (state.cellIndex == Utils.pSpec.N - 1) {
+            return 1;
+        } else {
+            return (state.cellIndex * 0.5f) / (Utils.pSpec.N - 1);
+        }
+
     }
 
     private int getFuelUsage(State state) {

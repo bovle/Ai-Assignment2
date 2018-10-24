@@ -60,12 +60,11 @@ class Sampler {
         float[] moveProbability = moveProbabilities.get(comboString);
         for (int i = 0; i < ProblemSpec.CAR_MOVE_RANGE; i++) {
             accumulativeProbability += moveProbability[i];
-            if (randNumber < accumulativeProbability) {
+            if (randNumber <= accumulativeProbability) {
                 return i;
             }
         }
-        System.out.println("how did we end up here?");
-        return 0;
+        return 11;
 
     }
 
