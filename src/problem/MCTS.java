@@ -12,10 +12,36 @@ class MCTS {
         this.sampler = sampler;
     }
 
-    public ActionDetail search(State initState, int maxTime) {
+    public Node Simulate(Node node, ActionDetail actionDetail) {
+
+        Node nextNode = null;
+        if (actionDetail.action == Action.CONTINUE_MOVING) {
+            for (Node n : node.children) {
+                if (n.actionDetail.action == Action.CONTINUE_MOVING) {
+                    node = n;
+                    break;
+                }
+            }
+        }
+
+        State nextState = transition(node.state, actionDetail);
+
+        if (node.freeActions != null && node.freeActions.contains(actionDetail.action)) {
+            nextState.timeStep -= 1;
+        }
+
+        for (Node n : node.children) {
+            if (n.state.equals(nextState)) {
+                nextNode = n;
+            }
+        }
+
+        return new Node(null, null, nextNode.state, nextNode.freeActions);
+    }
+
+    public ActionDetail search(Node root, int maxTime) {
         long startTime = System.currentTimeMillis();
         // init tree
-        Node root = new Node(null, null, initState);
 
         while ((System.currentTimeMillis() - startTime) < maxTime * 1000) {
             Node leafNode = findLeaf(root);
@@ -44,12 +70,15 @@ class MCTS {
                     }
                 }
                 if (!hasChildWithMove) {
-                    Node andNode = new Node(currentNode, actionDetail, currentState);
+                    Node andNode = new Node(currentNode, actionDetail, currentState, null);
                     currentNode.children.add(andNode);
                     currentNode = andNode;
                 }
             }
             State newState = transition(currentState, actionDetail);
+            if (currentNode.freeActions != null && currentNode.freeActions.contains(actionDetail.action)) {
+                newState.timeStep -= 1;
+            }
             boolean hasChildWithState = false;
             for (Node n : currentNode.children) {
                 if (n.state.equals(newState)) {
@@ -62,7 +91,20 @@ class MCTS {
             if (hasChildWithState) {
                 continue;
             } else {
-                Node newNode = new Node(currentNode, actionDetail, newState);
+                Node newNode;
+                if (currentNode.freeActions != null && currentNode.freeActions.contains(actionDetail.action)) {
+                    if (currentNode.freeActions.size() == 1) {
+                        newNode = new Node(currentNode, actionDetail, newState, null);
+                    } else {
+                        List<Action> freeAs = new ArrayList<>();
+                        freeAs.remove(actionDetail.action);
+                        newNode = new Node(currentNode, actionDetail, newState, freeAs);
+                    }
+
+                } else {
+                    newNode = new Node(currentNode, actionDetail, newState, Utils.getFreeActions(actionDetail.action));
+                }
+
                 currentNode.children.add(newNode);
                 currentNode = newNode;
                 break;
@@ -126,7 +168,7 @@ class MCTS {
         return n.getChild(returnIndex).actionDetail;
     }
 
-    public State transition(State state, ActionDetail actionDetail) {
+    private State transition(State state, ActionDetail actionDetail) {
         switch (actionDetail.action) {
         case CONTINUE_MOVING:
             int k = sampler.SampleMove(state);

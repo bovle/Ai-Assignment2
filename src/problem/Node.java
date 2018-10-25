@@ -1,6 +1,7 @@
 package problem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Node {
     public Node parent;
@@ -9,14 +10,16 @@ public class Node {
     public float reward;
     public int count;
     public ActionDetail actionDetail;
+    public List<Action> freeActions;
 
-    public Node(Node parent, ActionDetail actionDetial, State s) {
+    public Node(Node parent, ActionDetail actionDetial, State s, List<Action> freeActions) {
         this.parent = parent;
         this.children = new ArrayList<>();
         this.state = s;
         this.reward = 0;
         this.count = 0;
         this.actionDetail = actionDetial;
+        this.freeActions = freeActions;
     }
 
     public int numChildren() {

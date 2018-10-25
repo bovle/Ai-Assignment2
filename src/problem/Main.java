@@ -13,7 +13,7 @@ public class Main {
         // randomValues(40, false, 0.3, false);
         ProblemSpec ps;
         try {
-            ps = new ProblemSpec("examples/level_3/input1.txt");
+            ps = new ProblemSpec("examples/level_5/input1.txt");
             System.out.println(ps.toString());
             Utils.pSpec = ps;
             Sampler sampler = new Sampler();
@@ -22,17 +22,18 @@ public class Main {
             String car = (String) Utils.pSpec.carToIndex.keySet().toArray()[0];
             String driver = (String) Utils.pSpec.driverMoveProbability.keySet().toArray()[0];
             String tyreType = (String) Utils.pSpec.tyreModelMoveProbability.keySet().toArray()[0];
-            State currentState = new State(car, driver, tyreType, "100", ProblemSpec.FUEL_MAX, 0, 0);
-            while (currentState.cellIndex != Utils.pSpec.N - 1 && currentState.timeStep < Utils.pSpec.maxT) {
+            State initState = new State(car, driver, tyreType, "100", ProblemSpec.FUEL_MAX, 0, 0);
+            Node currentNode = new Node(null, null, initState, null);
+            while (currentNode.state.cellIndex != Utils.pSpec.N - 1 && currentNode.state.timeStep < Utils.pSpec.maxT) {
                 System.out.println();
-                System.out.println(currentState.toString());
-                ActionDetail nextAction = mcts.search(currentState, 15);
-                State nextState = mcts.transition(currentState, nextAction);
-                currentState = nextState;
+                System.out.println(currentNode.state.toString());
+                ActionDetail nextAction = mcts.search(currentNode, 15);
+                Node nextNode = mcts.Simulate(currentNode, nextAction);
+                currentNode = nextNode;
             }
             System.out.println();
-            System.out.println(currentState.toString());
-            if (currentState.cellIndex == Utils.pSpec.N - 1) {
+            System.out.println(currentNode.state.toString());
+            if (currentNode.state.cellIndex == Utils.pSpec.N - 1) {
                 System.out.println("Success");
             } else {
                 System.out.println("failure");
