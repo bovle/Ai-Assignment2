@@ -6,35 +6,35 @@ import java.util.List;
 class Utils {
     public static ProblemSpec pSpec;
 
-    public static List<Action> getFreeActions(Action action) {
-        if (Utils.pSpec.level.getLevelNumber() <= 3) {
+    public static List<ActionType> getFreeActions(ActionType action) {
+        if (Utils.pSpec.getLevel().getLevelNumber() <= 3) {
             return null;
         }
-        List<Action> result = new ArrayList<>();
+        List<ActionType> result = new ArrayList<>();
         switch (action) {
         case CHANGE_DRIVER:
-            result.add(Action.CHANGE_CAR);
+            result.add(ActionType.CHANGE_CAR);
             break;
         case CHANGE_CAR:
-            result.add(Action.CHANGE_DRIVER);
+            result.add(ActionType.CHANGE_DRIVER);
             break;
-        case CHANGE_TYRES:
-            if (Utils.pSpec.level.getLevelNumber() == 4)
+        case CHANGE_TIRES:
+            if (Utils.pSpec.getLevel().getLevelNumber() == 4)
                 return null;
-            result.add(Action.CHANGE_PRESSURE);
-            result.add(Action.ADD_FUEL);
+            result.add(ActionType.CHANGE_PRESSURE);
+            result.add(ActionType.ADD_FUEL);
             break;
         case CHANGE_PRESSURE:
-            if (Utils.pSpec.level.getLevelNumber() == 4)
+            if (Utils.pSpec.getLevel().getLevelNumber() == 4)
                 return null;
-            result.add(Action.CHANGE_TYRES);
-            result.add(Action.ADD_FUEL);
+            result.add(ActionType.CHANGE_TIRES);
+            result.add(ActionType.ADD_FUEL);
             break;
         case ADD_FUEL:
-            if (Utils.pSpec.level.getLevelNumber() == 4)
+            if (Utils.pSpec.getLevel().getLevelNumber() == 4)
                 return null;
-            result.add(Action.CHANGE_PRESSURE);
-            result.add(Action.CHANGE_TYRES);
+            result.add(ActionType.CHANGE_PRESSURE);
+            result.add(ActionType.CHANGE_TIRES);
             break;
         default:
             return null;

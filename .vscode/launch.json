@@ -11,8 +11,14 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
+            "sourcePaths": [
+                "${workspaceFolder}/src/"
+            ],
+            "classPaths": [
+                "${workspaceFolder}/build/classes"
+            ],
             "mainClass": "problem.Main",
-            "args": ""
+            "args": "examples/level_4/input_lvl4_3.txt ouput_lvl4_3.txt"
         }
     ]
 }

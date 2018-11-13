@@ -12,8 +12,8 @@ public class Level {
     private int levelNumber;
     /** List of terrain types present in level **/
     private List<Terrain> terrainTypes;
-    /** List of actions possible in level **/
-    private List<Action> availableActions;
+    /** List of action types possible in level **/
+    private List<ActionType> availableActions;
 
     /**
      * Load the level number
@@ -41,8 +41,12 @@ public class Level {
         return terrainTypes;
     }
 
-    public List<Action> getAvailableActions() {
+    public List<ActionType> getAvailableActions() {
         return availableActions;
+    }
+
+    public boolean isValidActionForLevel(ActionType a) {
+        return availableActions.contains(a);
     }
 
     private void loadLevel(int levelNumber) {
@@ -51,29 +55,29 @@ public class Level {
         availableActions = new ArrayList<>();
 
         switch (levelNumber) {
-            case 1:
-                loadTerrain(2);
-                loadActions(4);
-                break;
-            case 2:
-                loadTerrain(4);
-                loadActions(6);
-                break;
-            case 3:
-                loadTerrain(8);
-                loadActions(6);
-                break;
-            case 4:
-                loadTerrain(8);
-                loadActions(7);
-                break;
-            case 5:
-                loadTerrain(8);
-                loadActions(8);
-                break;
-            default:
-                System.out.println("Invalid level number " + levelNumber);
-                System.exit(1);
+        case 1:
+            loadTerrain(2);
+            loadActions(4);
+            break;
+        case 2:
+            loadTerrain(4);
+            loadActions(6);
+            break;
+        case 3:
+            loadTerrain(8);
+            loadActions(6);
+            break;
+        case 4:
+            loadTerrain(8);
+            loadActions(7);
+            break;
+        case 5:
+            loadTerrain(8);
+            loadActions(8);
+            break;
+        default:
+            System.out.println("Invalid level number " + levelNumber);
+            System.exit(1);
         }
     }
 
@@ -100,20 +104,20 @@ public class Level {
 
     private void loadActions(int maxAction) {
         if (maxAction >= 4) {
-            availableActions.add(Action.CONTINUE_MOVING);
-            availableActions.add(Action.CHANGE_CAR);
-            availableActions.add(Action.CHANGE_DRIVER);
-            availableActions.add(Action.CHANGE_TYRES);
+            availableActions.add(ActionType.MOVE);
+            availableActions.add(ActionType.CHANGE_CAR);
+            availableActions.add(ActionType.CHANGE_DRIVER);
+            availableActions.add(ActionType.CHANGE_TIRES);
         }
         if (maxAction >= 6) {
-            availableActions.add(Action.ADD_FUEL);
-            availableActions.add(Action.CHANGE_PRESSURE);
+            availableActions.add(ActionType.ADD_FUEL);
+            availableActions.add(ActionType.CHANGE_PRESSURE);
         }
         if (maxAction >= 7) {
-            availableActions.add(Action.CHANGE_CAR_AND_DRIVER);
+            availableActions.add(ActionType.CHANGE_CAR_AND_DRIVER);
         }
         if (maxAction >= 8) {
-            availableActions.add(Action.CHANGE_TYRE_FUEL_PRESSURE);
+            availableActions.add(ActionType.CHANGE_TIRE_FUEL_PRESSURE);
         }
     }
 }

@@ -3,18 +3,23 @@ package problem;
 class State {
     public String car;
     public String driver;
-    public String tyreType;
-    public String tyrePressure;
+    public Tire tireModel;
+    public TirePressure tirePressure;
     public int fuel;
     public int cellIndex;
     public int timeStep;
 
-    public State(String car, String driver, String tyreType, String tyrePressure, int fuel, int cellIndex,
+    public State(simulator.State simState, int timeStep) {
+        this(simState.getCarType(), simState.getDriver(), simState.getTireModel(), simState.getTirePressure(),
+                simState.getFuel(), simState.getPos() - 1, timeStep);
+    }
+
+    public State(String car, String driver, Tire tireModel, TirePressure tirePressure, int fuel, int cellIndex,
             int timeStep) {
         this.car = car;
         this.driver = driver;
-        this.tyreType = tyreType;
-        this.tyrePressure = tyrePressure;
+        this.tireModel = tireModel;
+        this.tirePressure = tirePressure;
         this.fuel = fuel;
         this.cellIndex = cellIndex;
         this.timeStep = timeStep;
@@ -26,8 +31,8 @@ class State {
             return false;
         }
         State other = (State) obj;
-        if (car.equals(other.car) && driver.equals(other.driver) && tyreType.equals(other.tyreType)
-                && tyrePressure.equals(other.tyrePressure) && fuel == other.fuel && cellIndex == other.cellIndex
+        if (car.equals(other.car) && driver.equals(other.driver) && tireModel.equals(other.tireModel)
+                && tirePressure.equals(other.tirePressure) && fuel == other.fuel && cellIndex == other.cellIndex
                 && timeStep == other.timeStep) {
             return true;
         } else {
@@ -37,7 +42,7 @@ class State {
 
     @Override
     public String toString() {
-        return "(" + car + ", " + driver + ", " + tyreType + ", " + tyrePressure + ", " + fuel + ", " + cellIndex + ", "
-                + timeStep + ")";
+        return "(" + car + ", " + driver + ", " + tireModel + ", " + tirePressure + ", " + fuel + ", " + cellIndex
+                + ", " + timeStep + ")";
     }
 }
